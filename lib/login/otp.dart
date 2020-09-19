@@ -1,7 +1,11 @@
-import 'package:Social/home/home.dart';
+import 'package:Social/login/details.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
+
+import '../User.dart';
 
 class OtpLogin extends StatefulWidget {
   final String mobNumber;
@@ -22,6 +26,7 @@ class _OtpLoginState extends State<OtpLogin> {
   String mobNumber;
   String verificationId;
   int resendToken;
+  bool showProgressBar = false;
 
   _OtpLoginState(this.mobNumber, this.verificationId, this.resendToken);
 
@@ -31,13 +36,32 @@ class _OtpLoginState extends State<OtpLogin> {
 
     await FirebaseAuth.instance
         .signInWithCredential(phoneAuthCredential)
-        .then((value) => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyHomePage(),
-                  ))
-            });
+        .then((value) {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      if (auth.currentUser != null) {
+        UserService(
+                displayName: auth.currentUser.displayName,
+                creationTime: auth.currentUser.metadata.creationTime,
+                lastSignInTime: auth.currentUser.metadata.lastSignInTime,
+                phoneNumber: auth.currentUser.phoneNumber,
+                photoURL: auth.currentUser.photoURL,
+                uid: auth.currentUser.uid)
+            .addUser();
+      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => EnterDetails()),
+      );
+    }).catchError((onError) {
+      setState(() {
+        showProgressBar = false;
+      });
+      Fluttertoast.showToast(
+        msg: "Opps! You entered a wrong OTP.Please check it again.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.SNACKBAR,
+    );
+    });
   }
 
   var visited = false;
@@ -122,6 +146,11 @@ class _OtpLoginState extends State<OtpLogin> {
                 ],
               ),
               SizedBox(height: 20),
+              if (showProgressBar)
+                Container(
+                    width: 200,
+                    padding: const EdgeInsets.only(top: 50.0),
+                    child: LinearProgressIndicator()),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 30.0),
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -146,7 +175,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -170,7 +198,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -194,7 +221,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -218,7 +244,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -242,7 +267,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -266,7 +290,6 @@ class _OtpLoginState extends State<OtpLogin> {
                             maxLength: 1,
                             keyboardType: TextInputType.phone,
                             decoration: InputDecoration(
-                                hintText: '0',
                                 counterText: '',
                                 isDense: true,
                                 contentPadding: EdgeInsets.only(bottom: 2.0)))),
@@ -282,8 +305,14 @@ class _OtpLoginState extends State<OtpLogin> {
                     child: RaisedButton(
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0)),
-                      onPressed:
-                          (otp.join().length == 6) ? () => checkOTP() : null,
+                      onPressed: (otp.join().length == 6)
+                          ? () {
+                              setState(() {
+                                showProgressBar = true;
+                              });
+                              checkOTP();
+                            }
+                          : null,
                       child: Text(
                         'Verify',
                         style: TextStyle(

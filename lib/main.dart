@@ -1,9 +1,9 @@
 import 'package:Social/home/home.dart';
+import 'package:Social/login/details.dart';
 import 'package:Social/login/enter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +24,16 @@ class MyApp extends StatelessWidget {
       return true;
     } else {
       return false;
+    }
+  }
+
+  isDisplayNameSet() {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    if (auth.currentUser.displayName == null ||
+        auth.currentUser.displayName != '') {
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -61,18 +71,9 @@ class MyApp extends StatelessWidget {
                 // closer together (more dense) than on mobile platforms.
                 visualDensity: VisualDensity.adaptivePlatformDensity,
               ),
-              home: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: SystemUiOverlayStyle(
-                    statusBarColor:
-                        Colors.transparent, // transparent status bar
-                    systemNavigationBarColor:
-                        Colors.black, // navigation bar color
-                    statusBarIconBrightness:
-                        Brightness.dark, // status bar icons' color
-                    systemNavigationBarIconBrightness:
-                        Brightness.light, //navigation bar icons' color
-                  ),
-                  child: isLogin() ? MyHomePage() : FirstLogin()));
+              home: isLogin()
+                  ? (isDisplayNameSet() ? MyHomePage() : EnterDetails())
+                  : FirstLogin());
         }
 
         // Otherwise, show something whilst waiting for initialization to complete

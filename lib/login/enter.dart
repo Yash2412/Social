@@ -1,4 +1,4 @@
-import 'package:Social/home/home.dart';
+import 'package:Social/login/details.dart';
 import 'package:Social/login/otp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +11,7 @@ class FirstLogin extends StatefulWidget {
 
 class _FirstLoginState extends State<FirstLogin> {
   var mobNumber = '';
+  bool showProgressBar = false;
 
   Future<void> verify(BuildContext context) async {
     FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,17 +19,21 @@ class _FirstLoginState extends State<FirstLogin> {
     _auth.verifyPhoneNumber(
       phoneNumber: '+91' + this.mobNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
-        await _auth.signInWithCredential(credential).then((value) => {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyHomePage(),
-                  ))
-            });
+        await _auth.signInWithCredential(credential).then((value) {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EnterDetails(),
+              ));
+        });
       },
       verificationFailed: (FirebaseAuthException e) {
         print(e.code);
         print(e.message);
+        setState(() {
+          showProgressBar = false;
+        });
+
         if (e.code == 'invalid-phone-number') {
           print('The provided phone number is not valid.');
         }
@@ -86,6 +91,11 @@ class _FirstLoginState extends State<FirstLogin> {
                   )
                 ],
               ),
+              if (showProgressBar)
+                Container(
+                    width: 250,
+                    padding: const EdgeInsets.only(top: 50.0),
+                    child: LinearProgressIndicator()),
               SizedBox(height: 20),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 30.0),
@@ -148,7 +158,12 @@ class _FirstLoginState extends State<FirstLogin> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8.0)),
                       onPressed: (mobNumber.length == 10)
-                          ? () => {verify(context)}
+                          ? () {
+                              setState(() {
+                                showProgressBar = true;
+                              });
+                              verify(context);
+                            }
                           : null,
                       child: Text(
                         'Next',
