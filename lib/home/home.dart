@@ -1,5 +1,9 @@
 import 'package:Social/conversations/recentChats.dart';
 import 'package:Social/home/hubs.dart';
+import 'package:Social/theme/theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -8,7 +12,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  var myUID = FirebaseAuth.instance.currentUser.uid;
+
   int _active = 1;
 
   var tabs = [
@@ -25,10 +31,11 @@ class _MyHomePageState extends State<MyHomePage>
       body: tabs[_active],
       bottomNavigationBar: BottomNavigationBar(
         elevation: 0.0,
+        backgroundColor: background,
+        fixedColor: orange,
         iconSize: 25.0,
-        selectedFontSize: 14,
+        selectedFontSize: 15,
         unselectedFontSize: 12,
-        fixedColor: Colors.black,
         currentIndex: _active,
         onTap: (index) {
           print(index);
@@ -49,49 +56,60 @@ class _MyHomePageState extends State<MyHomePage>
       ),
     );
   }
-}
 
-/*
-class BottomBar extends StatelessWidget {
+  pushNotification() {
+    FirebaseMessaging().configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        FirebaseFirestore.instance
+            .doc(
+                'users/${message['data']['recipient']}/$myUID/${message['data']['doc']}')
+            .update({"isDelivered": true});
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+      },
+    );
+  }
+
   @override
-  
-    // return BottomAppBar(
-    //     shape: CircularNotchedRectangle(),
-    //     notchMargin: 6.0,
-    //     color: Colors.transparent,
-    //     elevation: 9.0,
-    //     clipBehavior: Clip.antiAlias,
-    //     child: Container(
-    //         height: 50.0,
-    //         decoration: BoxDecoration(
-    //             borderRadius: BorderRadius.only(
-    //                 topLeft: Radius.circular(25.0),
-    //                 topRight: Radius.circular(25.0)),
-    //             color: Colors.black),
-    //         child: Row(
-    //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //             children: [
-    //               Container(
-    //                   height: 50.0,
-    //                   width: MediaQuery.of(context).size.width / 2 - 40.0,
-    //                   child: Row(
-    //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //                     children: <Widget>[
-    //                       Icon(Icons.home, color: Colors.white),
-    //                       Icon(Icons.group, color: Colors.white),
-    //                     ],
-    //                   )),
-    //               Container(
-    //                   height: 50.0,
-    //                   width: MediaQuery.of(context).size.width / 2 - 40.0,
-    //                   child: Row(
-    //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //                     children: <Widget>[
-    //                       Icon(Icons.add_alert, color: Colors.white),
-    //                       Icon(Icons.search, color: Colors.white),
-    //                     ],
-    //                   )),
-    //             ])));
+  void initState() {
+    super.initState();
+    pushNotification();
+
+    WidgetsBinding.instance.addObserver(this);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(myUID)
+        .update({'lastSceen': DateTime.now(), 'isOnline': true});
+  }
+
+  @override
+  void dispose() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(myUID)
+        .update({'lastSceen': DateTime.now(), 'isOnline': false});
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+
+    if (state == AppLifecycleState.resumed) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(myUID)
+          .update({'lastSceen': DateTime.now(), 'isOnline': true});
+    } else
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(myUID)
+          .update({'lastSceen': DateTime.now(), 'isOnline': false});
   }
 }
-*/

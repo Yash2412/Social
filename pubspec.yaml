@@ -33,10 +33,12 @@ dependencies:
   sqflite:
   crypto: ^2.1.5
   contacts_service: ^0.4.6
-  permission_handler: ^5.0.1+1
+  permission_handler: 
+  keyboard_visibility: ^0.5.2
   timeago: ^2.0.27
   image_picker: ^0.6.5
   fluttertoast: ^7.1.1
+  firebase_messaging: ^7.0.2
 
 dev_dependencies:
   flutter_test:

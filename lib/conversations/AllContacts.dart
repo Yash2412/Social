@@ -1,7 +1,9 @@
 import 'package:Social/conversations/chatRoom.dart';
+import 'package:Social/theme/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
@@ -39,61 +41,55 @@ class _AllContactsState extends State<AllContacts> {
     return snapshot.docs;
   }
 
-  Future<PermissionStatus> _getPermission() async {
-    final PermissionStatus permission = await Permission.contacts.status;
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.denied) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.contacts].request();
-      return permissionStatus[Permission.contacts] ??
-          PermissionStatus.undetermined;
-    } else {
-      return permission;
-    }
+  checkUpdate(contact) {
+    FirebaseFirestore.instance
+        .doc('users/${contact['uid']}')
+        .get()
+        .then((value) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(myUID)
+          .collection('RecentChats')
+          .doc(contact['uid'])
+          .update(value.data());
+    });
   }
 
   getAllContacts() async {
-    final PermissionStatus permissionStatus = await _getPermission();
-    if (permissionStatus == PermissionStatus.granted) {
+    if (await Permission.contacts.request().isGranted) {
       List<Contact> _contacts = (await ContactsService.getContacts()).toList();
-
       _contacts.forEach((cont) {
         cont.phones.forEach((phn) {
           String phnFlattened = numberWithCountryCode(phn.value);
           validateNumber(phnFlattened).then((res) {
             if (res != null && res.length > 0) {
-              setState(() {
-                dynamic temp = res[0].data();
-                if (temp['phoneNumber'] != myNumber) {
-                  FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(myUID)
-                      .collection('SavedContacts')
-                      .doc(temp['uid'])
-                      .set(temp)
-                      .then((value) => print('Contact list updated'));
-                }
-              });
+              dynamic temp = res[0].data();
+              if (temp['phoneNumber'] != myNumber) {
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(myUID)
+                    .collection('SavedContacts')
+                    .doc(temp['uid'])
+                    .set(temp)
+                    .then((value) => print('Contact list updated'));
+              }
             }
           });
         });
       });
     } else {
       //If permissions have been denied show standard cupertino alert dialog
-      showDialog(
-          context: context,
-          builder: (BuildContext context) => CupertinoAlertDialog(
-                title: Text('Permissions error'),
-                content: Text('Please enable contacts access '
-                    'permission in system settings'),
-                actions: <Widget>[
-                  CupertinoDialogAction(
-                    child: Text('OK'),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              ));
+      Fluttertoast.showToast(
+        msg: "Opps! Permission Denied!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.SNACKBAR,
+      );
     }
+  }
+
+  initState() {
+    super.initState();
+    getAllContacts();
   }
 
   String flattenPhoneNumber(String phoneStr) {
@@ -119,12 +115,6 @@ class _AllContactsState extends State<AllContacts> {
           return false;
         }
 
-        // var phone = contact.phones.firstWhere((phn) {
-        //   String phnFlattened = flattenPhoneNumber(phn.value);
-
-        // }, orElse: () => null);
-
-        // return phone != null;
         return contact.data()["phoneNumber"].contains(searchTermFlatten);
       });
     }
@@ -146,24 +136,25 @@ class _AllContactsState extends State<AllContacts> {
         .orderBy('displayName', descending: false)
         .snapshots();
     return Scaffold(
+      backgroundColor: background,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black54, size: 30.0),
+        iconTheme: IconThemeData(color: forground, size: 30.0),
         title: (!showSearch)
             ? Text(
                 "Select contact",
-                style: TextStyle(fontSize: 22.0, color: Colors.black54),
+                style: TextStyle(fontSize: 22.0, color: forground),
               )
             : TextField(
                 autofocus: true,
                 controller: searchController,
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 18, color: forground),
                 decoration: InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
                     hintText: 'Search',
                     // floatingLabelBehavior: FloatingLabelBehavior.never,
                     contentPadding: EdgeInsets.only(bottom: 2.0))),
-        backgroundColor: Colors.white,
+        backgroundColor: background,
         automaticallyImplyLeading: true,
         titleSpacing: 20.0,
         actions: [
@@ -171,7 +162,6 @@ class _AllContactsState extends State<AllContacts> {
               iconSize: 25.0,
               icon: Icon(
                 (!showSearch) ? Icons.search : Icons.cancel,
-                color: Colors.deepPurple,
               ),
               onPressed: () {
                 setState(() {
@@ -181,7 +171,7 @@ class _AllContactsState extends State<AllContacts> {
           if (!showSearch)
             IconButton(
                 iconSize: 25.0,
-                icon: Icon(Icons.refresh, color: Colors.deepPurple),
+                icon: Icon(Icons.refresh),
                 onPressed: () {
                   getAllContacts();
                 })
@@ -199,10 +189,6 @@ class _AllContactsState extends State<AllContacts> {
                   return Center(child: CircularProgressIndicator());
                 }
 
-                if (!snapshot.hasData || snapshot.data.documents.length == 0) {
-                  getAllContacts();
-                  return Center(child: CircularProgressIndicator());
-                }
                 contacts = snapshot.data.documents;
                 searchController.addListener(() {
                   filterContacts();
@@ -229,14 +215,23 @@ class _AllContactsState extends State<AllContacts> {
                             )),
                         leading: CircleAvatar(
                           backgroundImage: NetworkImage(contact['photoURL']),
-                          maxRadius: 24.0,
+                          maxRadius: 20.0,
                           minRadius: 20.0,
                         ),
-                        title: Text(contact['displayName']),
+                        title: Text(
+                          contact['displayName'],
+                          style: TextStyle(
+                              color: forground,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600),
+                        ),
                         // subtitle: Text('Here is a second line'),
-                        subtitle: Text(contact['phoneNumber'] != ''
-                            ? contact['phoneNumber']
-                            : ''),
+                        subtitle: Text(
+                          contact['phoneNumber'] != ''
+                              ? contact['phoneNumber']
+                              : '',
+                          style: TextStyle(color: cyan),
+                        ),
                         trailing: Icon(
                           Icons.arrow_right,
                           size: 30.0,
@@ -247,54 +242,3 @@ class _AllContactsState extends State<AllContacts> {
     );
   }
 }
-/*
-class Search extends SearchDelegate {
-  String searchResult = '';
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    // TODO: implement buildActions
-    return <Widget>[
-      IconButton(
-          icon: Icon(Icons.close),
-          onPressed: () {
-            query = '';
-          })
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    // TODO: implement buildLeading
-    return IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context);
-        });
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
-    return Container(
-      child: TextField(
-        controller: searchController,
-        decoration: InputDecoration(
-            labelText: 'Search',
-            border: new OutlineInputBorder(
-                borderSide:
-                    new BorderSide(color: Theme.of(context).primaryColor)),
-            prefixIcon:
-                Icon(Icons.search, color: Theme.of(context).primaryColor)),
-      ),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    // TODO: implement buildSuggestions
-
-    throw UnimplementedError();
-  }
-}
-*/

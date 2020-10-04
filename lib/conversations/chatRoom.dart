@@ -1,4 +1,6 @@
 import 'package:Social/User.dart';
+import 'package:Social/theme/theme.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +25,24 @@ class _ChatRoomState extends State<ChatRoom> {
   TextEditingController sendController = new TextEditingController();
   ScrollController _scrollController = new ScrollController();
 
+  @override
+  void initState() {
+    super.initState();
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(myUID)
+            .update({"isTyping": visible});
+      },
+    );
+  }
+
   void sendMessage() {
-    UserService().addChat(contact, sendController.text.trim().toString());
-    sendController.clear();
+    if (sendController.text.trim().toString() != '') {
+      UserService().addChat(contact, sendController.text.trim().toString());
+      sendController.clear();
+    }
   }
 
   @override
@@ -36,25 +53,48 @@ class _ChatRoomState extends State<ChatRoom> {
         .collection(contact['uid'].toString())
         .orderBy('sendAt', descending: true)
         .snapshots();
-    var fifteenAgo =
-        DateTime.now().difference(contact['lastSignInTime'].toDate());
+
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black54, size: 30.0),
+        iconTheme: IconThemeData(color: forground, size: 30.0),
         title: ListTile(
             leading: CircleAvatar(
               backgroundImage: NetworkImage(contact['photoURL']),
-              maxRadius: 24.0,
+              maxRadius: 20.0,
               minRadius: 20.0,
             ),
             title: Text(contact['displayName']),
-            subtitle: Text(
-                timeago.format(DateTime.now().subtract(fifteenAgo),
-                    locale: 'en'),
-                style: TextStyle(fontSize: 10))),
-        backgroundColor: Colors.white,
+            subtitle: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(contact['uid'])
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  var fifteenAgo = DateTime.now()
+                      .difference(snapshot.data.data()['lastSceen'].toDate());
+                  return snapshot.data.data()['isOnline']
+                      ? snapshot.data.data()['isTyping']
+                          ? Text('typing...', style: TextStyle(fontSize: 10))
+                          : Text('Online', style: TextStyle(fontSize: 10))
+                      : Text(
+                          'Active ${timeago.format(DateTime.now().subtract(fifteenAgo), locale: 'en')}',
+                          style: TextStyle(fontSize: 10));
+                },
+                initialData: contact['isOnline']
+                    ? Text('Online', style: TextStyle(fontSize: 10))
+                    : Text(
+                        'Active ${timeago.format(DateTime.now().subtract(DateTime.now().difference(contact['lastSceen'].toDate())), locale: 'en')}',
+                        style: TextStyle(fontSize: 10)))),
+        backgroundColor: background,
         automaticallyImplyLeading: true,
-        titleSpacing: 0.0,
+        titleSpacing: -10,
         actions: [
           IconButton(icon: Icon(Icons.call), onPressed: () {}),
           IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
@@ -64,9 +104,7 @@ class _ChatRoomState extends State<ChatRoom> {
         children: [
           Container(
             // decoration: BoxDecoration(color: Colors.black),
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [Color(0xffdfe9f3), Color(0xffffffff)])),
+            decoration: BoxDecoration(color: background),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -89,6 +127,14 @@ class _ChatRoomState extends State<ChatRoom> {
                       reverse: true,
                       itemCount: snapshot.data.documents.length,
                       itemBuilder: (context, index) {
+                        if (!snapshot.data.documents[index]
+                            .data()['sendByMe']) {
+                          FirebaseFirestore.instance
+                              .doc(
+                                  'users/${contact['uid']}/$myUID/${snapshot.data.documents[index].documentID}')
+                              .update({'isRead': true, 'isDelivered': true});
+                        }
+                        // print('users/${contact['uid']}/$myUID/${snapshot.data.documents[index].documentID}');
                         return ChatBox(snapshot.data.documents[index].data());
                       },
                     );
@@ -108,6 +154,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       child: TextField(
                         maxLines: 5,
                         minLines: 1,
+                        style: TextStyle(fontSize: 18, color: forground),
                         controller: sendController,
                         decoration: InputDecoration(
                             isDense: true,
@@ -116,21 +163,13 @@ class _ChatRoomState extends State<ChatRoom> {
                                   const Radius.circular(30.0),
                                 ),
                                 borderSide: BorderSide.none),
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(right: 10.0),
-                              child: IconButton(
-                                  icon: Icon(
-                                    Icons.broken_image,
-                                    size: 30.0,
-                                  ),
-                                  onPressed: () {}),
-                            ),
                             filled: true,
-                            hintStyle: new TextStyle(color: Colors.grey[800]),
+                            hintStyle:
+                                new TextStyle(color: forground, fontSize: 16),
                             contentPadding: EdgeInsets.symmetric(
-                                vertical: 8.0, horizontal: 20.0),
+                                vertical: 13.0, horizontal: 20.0),
                             hintText: "Type in your text",
-                            fillColor: Colors.white),
+                            fillColor: currentLine),
                       ),
                     ),
                     SizedBox(
@@ -138,7 +177,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     ),
                     Container(
                         decoration: BoxDecoration(
-                            color: Colors.blueAccent,
+                            color: red,
                             borderRadius: BorderRadius.circular(100.0)),
                         child: IconButton(
                             iconSize: 23,
@@ -185,6 +224,15 @@ class _ChatRoomState extends State<ChatRoom> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    sendController.dispose();
+    super.dispose();
+  }
+
+  
 }
 
 class ChatBox extends StatelessWidget {
@@ -193,37 +241,67 @@ class ChatBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      alignment:
-          chat['sendByMe'] ? Alignment.centerRight : Alignment.centerLeft,
+    return InkWell(
+      onTap: () {
+        print("object");
+      },
       child: Container(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
-          color: chat['sendByMe'] ? Colors.black12 : Colors.white,
-        ),
-        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 1.5),
-        child: Stack(
-          children: [
-            Container(
-              padding:
-                  EdgeInsets.only(left: 10, top: 10, bottom: 15, right: 45),
-              child: Text(
-                chat['msg'],
-                style: TextStyle(color: Colors.black),
+        width: MediaQuery.of(context).size.width,
+        alignment:
+            chat['sendByMe'] ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            color: !chat['sendByMe'] ? comment : currentLine,
+          ),
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          child: Stack(
+            children: [
+              Container(
+                padding:
+                    EdgeInsets.only(left: 10, top: 10, bottom: 15, right: 50),
+                child: Text(
+                  chat['msg'],
+                  style: TextStyle(color: forground, fontSize: 16),
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 5,
-              right: 8,
-              child: Text(
-                DateFormat.Hm().format(chat['sendAt'].toDate()),
-                style: TextStyle(fontSize: 10),
+              Positioned(
+                bottom: 5,
+                right: (chat['sendByMe']) ? 25 : 8,
+                child: Text(
+                  DateFormat.Hm().format(chat['sendAt'].toDate()),
+                  style: TextStyle(fontSize: 10, color: Colors.white60),
+                ),
               ),
-            )
-          ],
+              if (chat['sendByMe'])
+                Positioned(
+                  bottom: 5,
+                  right: 7,
+                  child: chat['isSent']
+                      ? chat['isDelivered']
+                          ? chat['isRead']
+                              ? Icon(
+                                  Icons.done_all,
+                                  size: 15,
+                                  color: Colors.blue,
+                                )
+                              : Icon(
+                                  Icons.done_all,
+                                  size: 15,
+                                )
+                          : Icon(
+                              Icons.done,
+                              size: 15,
+                            )
+                      : Icon(
+                          Icons.access_time,
+                          size: 13,
+                        ),
+                )
+            ],
+          ),
         ),
       ),
     );

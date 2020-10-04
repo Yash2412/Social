@@ -1,5 +1,6 @@
 import 'package:Social/login/details.dart';
 import 'package:Social/login/otp.dart';
+import 'package:Social/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,7 +41,7 @@ class _FirstLoginState extends State<FirstLogin> {
       },
       codeSent: (String verificationId, int resendToken) async {
         print("codesent");
-        Navigator.push(
+        Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => OtpLogin(
@@ -60,6 +61,7 @@ class _FirstLoginState extends State<FirstLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: background,
       body: SafeArea(
         child: Container(
           margin: EdgeInsets.symmetric(vertical: 15.0),
@@ -77,6 +79,7 @@ class _FirstLoginState extends State<FirstLogin> {
                       style: TextStyle(
                           fontSize: 45,
                           letterSpacing: 0.2,
+                          color: forground,
                           fontWeight: FontWeight.w700),
                     ),
                   )
@@ -87,16 +90,19 @@ class _FirstLoginState extends State<FirstLogin> {
                 children: [
                   Text(
                     'Sign Up',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: forground,
+                        fontWeight: FontWeight.w700),
                   )
                 ],
               ),
               if (showProgressBar)
                 Container(
-                    width: 250,
-                    padding: const EdgeInsets.only(top: 50.0),
-                    child: LinearProgressIndicator()),
-              SizedBox(height: 20),
+                    padding: const EdgeInsets.only(top: 10.0),
+                    margin: EdgeInsets.only(top: 20),
+                    child: CircularProgressIndicator()),
+              SizedBox(height: 50),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 30.0),
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -106,7 +112,10 @@ class _FirstLoginState extends State<FirstLogin> {
                     Flexible(
                         flex: 1,
                         child: TextField(
-                            style: TextStyle(fontSize: 17),
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: forground,
+                            ),
                             maxLines: 1,
                             minLines: 1,
                             keyboardType: TextInputType.phone,
@@ -128,7 +137,7 @@ class _FirstLoginState extends State<FirstLogin> {
                           },
                           style: TextStyle(
                               fontSize: 17,
-                              color: Colors.black,
+                              color: forground,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.8),
                           maxLength: 10,
@@ -139,8 +148,8 @@ class _FirstLoginState extends State<FirstLogin> {
                               counterText: '',
                               hintText: 'Enter mobile number',
                               hintStyle: TextStyle(
-                                  color: Colors.black12,
-                                  fontWeight: FontWeight.normal,
+                                  color: forground,
+                                  fontWeight: FontWeight.w400,
                                   letterSpacing: 1.0),
                               isDense: true,
                               contentPadding: EdgeInsets.only(bottom: 2.0)),
@@ -148,6 +157,7 @@ class _FirstLoginState extends State<FirstLogin> {
                   ],
                 ),
               ),
+              SizedBox(height: 30,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -168,14 +178,15 @@ class _FirstLoginState extends State<FirstLogin> {
                       child: Text(
                         'Next',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
+                            color: forground,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: 1.0),
                       ),
-                      disabledColor: Colors.black26,
-                      disabledTextColor: Colors.white54,
+                      disabledColor: currentLine,
+                      disabledTextColor: background,
                       disabledElevation: 0.0,
-                      color: Colors.black,
+                      color: red,
                     ),
                   )
                 ],

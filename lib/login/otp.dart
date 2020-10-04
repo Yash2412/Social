@@ -1,9 +1,10 @@
 import 'package:Social/login/details.dart';
+import 'package:Social/login/enter.dart';
+import 'package:Social/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 
 import '../User.dart';
 
@@ -32,7 +33,7 @@ class _OtpLoginState extends State<OtpLogin> {
 
   Future<void> checkOTP() async {
     PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
-        verificationId: verificationId, smsCode: this.otp.join());
+        verificationId: verificationId, smsCode: otp.join());
 
     await FirebaseAuth.instance
         .signInWithCredential(phoneAuthCredential)
@@ -60,7 +61,7 @@ class _OtpLoginState extends State<OtpLogin> {
         msg: "Opps! You entered a wrong OTP.Please check it again.",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.SNACKBAR,
-    );
+      );
     });
   }
 
@@ -70,6 +71,7 @@ class _OtpLoginState extends State<OtpLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: background,
       body: SafeArea(
         child: Container(
           margin: EdgeInsets.symmetric(vertical: 15.0),
@@ -85,6 +87,7 @@ class _OtpLoginState extends State<OtpLogin> {
                     child: Text(
                       'Social',
                       style: TextStyle(
+                          color: forground,
                           fontSize: 45,
                           letterSpacing: 0.2,
                           fontWeight: FontWeight.w700),
@@ -100,7 +103,10 @@ class _OtpLoginState extends State<OtpLogin> {
                 children: [
                   Text(
                     'Enter OTP',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: forground,
+                        fontWeight: FontWeight.w700),
                   )
                 ],
               ),
@@ -114,12 +120,14 @@ class _OtpLoginState extends State<OtpLogin> {
                     'Enter the 4 digit verification code sent to ',
                     style: TextStyle(
                       fontSize: 13,
+                      color: forground,
                     ),
                   ),
                   Text(
                     'your registered mobile number',
                     style: TextStyle(
                       fontSize: 13,
+                      color: forground,
                     ),
                   )
                 ],
@@ -130,16 +138,23 @@ class _OtpLoginState extends State<OtpLogin> {
                 children: [
                   Text(
                     '+91 $mobNumber is not your number?  ',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontSize: 15,
+                        color: forground,
+                        fontWeight: FontWeight.w500),
                   ),
                   InkWell(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FirstLogin(),
+                            ));
                       },
                       child: Text(
                         'Edit',
                         style: TextStyle(
-                            color: Colors.black87,
+                            color: orange,
                             fontWeight: FontWeight.w700,
                             fontSize: 15),
                       ))
@@ -148,9 +163,9 @@ class _OtpLoginState extends State<OtpLogin> {
               SizedBox(height: 20),
               if (showProgressBar)
                 Container(
-                    width: 200,
-                    padding: const EdgeInsets.only(top: 50.0),
-                    child: LinearProgressIndicator()),
+                    padding: const EdgeInsets.only(top: 10.0),
+                    margin: const EdgeInsets.only(top: 20.0),
+                    child: CircularProgressIndicator()),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 30.0),
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -316,14 +331,15 @@ class _OtpLoginState extends State<OtpLogin> {
                       child: Text(
                         'Verify',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
+                            color: forground,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18,
                             letterSpacing: 1.0),
                       ),
-                      disabledColor: Colors.black26,
-                      disabledTextColor: Colors.white54,
+                      disabledColor: currentLine,
+                      disabledTextColor: background,
                       disabledElevation: 0.0,
-                      color: Colors.black,
+                      color: red,
                     ),
                   )
                 ],
