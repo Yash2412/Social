@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 var background = Color(0xff282a36);
+// var background = Colors.black;
 var currentLine = Color(0xff44475a);
 var forground = Color(0xfff8f8f2);
 var comment = Color(0xff6272a4);

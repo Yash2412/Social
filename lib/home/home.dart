@@ -1,4 +1,5 @@
 import 'package:Social/conversations/recentChats.dart';
+import 'package:Social/feeds/MainFeed.dart';
 import 'package:Social/home/hubs.dart';
 import 'package:Social/theme/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,9 +21,7 @@ class _MyHomePageState extends State<MyHomePage>
   var tabs = [
     Hubs(),
     RecentChats(),
-    Center(
-      child: Text('Feeds'),
-    )
+    MainFeed()
   ];
 
   @override
@@ -38,7 +37,6 @@ class _MyHomePageState extends State<MyHomePage>
         unselectedFontSize: 12,
         currentIndex: _active,
         onTap: (index) {
-          print(index);
           setState(() {
             _active = index;
           });

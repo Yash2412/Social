@@ -36,7 +36,6 @@ exports.onNewMessage = functions.firestore
                 };
                 admin.messaging().send(message)
                     .then(response => {
-                        admin.firestore().doc(`users/${collID}/${userId}/${docID}`).update({ "isDelivered": true });
                         console.log("Successfully sent message", response);
                     })
                     .catch(error => {

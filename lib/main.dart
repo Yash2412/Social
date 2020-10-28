@@ -5,6 +5,7 @@ import 'package:Social/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +18,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
+  // This widget is the root of our application.
 
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
+  initState() {
+    super.initState();
+
+    setColor();
+  }
+
+  setColor() async {
+    await FlutterStatusbarcolor.setStatusBarColor(background);
+    await FlutterStatusbarcolor.setNavigationBarColor(background);
+    FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
+    FlutterStatusbarcolor.setNavigationBarWhiteForeground(true);
+  }
 
   isLogin() {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -48,17 +62,29 @@ class _MyAppState extends State<MyApp> {
         // Check for errors
         if (snapshot.hasError) {
           return MaterialApp(
+            theme: ThemeData(
+                brightness: Brightness.dark,
+                primaryColor: forground,
+                backgroundColor: background,
+                fontFamily: 'Roboto'),
+            debugShowCheckedModeBanner: false,
+            title: 'Social',
             home: Scaffold(
               body: Center(
                 child: CircularProgressIndicator(),
               ),
             ),
-          );  
+          );
         }
 
-        // Once complete, show your application
+        // Once complete, show our application
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
+              // routes: {
+              //   '/home/AllContactsForGroup': (context) => AllContactsForGroup(),
+              //   '/home/AllContactsForGroup/SetGroupDetails': (context) => (),
+
+              // },
               theme: ThemeData(
                   brightness: Brightness.dark,
                   primaryColor: forground,
@@ -73,6 +99,13 @@ class _MyAppState extends State<MyApp> {
 
         // Otherwise, show something whilst waiting for initialization to complete
         return MaterialApp(
+          theme: ThemeData(
+              brightness: Brightness.dark,
+              primaryColor: forground,
+              backgroundColor: background,
+              fontFamily: 'Roboto'),
+          debugShowCheckedModeBanner: false,
+          title: 'Social',
           home: Scaffold(
             body: Center(
               child: CircularProgressIndicator(),

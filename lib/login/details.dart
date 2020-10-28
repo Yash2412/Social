@@ -21,7 +21,7 @@ class _EnterDetailsState extends State<EnterDetails> {
 
   getImage() async {
     // ignore: deprecated_member_use
-    ImagePicker.pickImage(source: ImageSource.gallery).then((value) {
+    ImagePicker.pickImage(source: ImageSource.gallery,imageQuality: 70).then((value) {
       setState(() {
         image = value;
       });

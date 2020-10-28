@@ -115,7 +115,7 @@ class _RecentChatsState extends State<RecentChats> {
                             isThreeLine: false,
                             subtitle: Text(
                               contact['lastMsg'].toString().length > 30
-                                  ? '${contact['lastMsg'].toString().substring(0, 30)} ....'
+                                  ? '${contact['lastMsg'].toString().replaceAll('\n', ' ').replaceAll('\t', ' ').substring(0, 30)} ....'
                                   : contact['lastMsg'].toString(),
                               style: TextStyle(color: cyan),
                             ),
@@ -129,19 +129,20 @@ class _RecentChatsState extends State<RecentChats> {
                                     style: TextStyle(
                                       fontSize: 10,
                                     )),
-                                Container(
-                                    padding: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                        color: comment,
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    child: Text(
-                                      '20',
-                                      style: TextStyle(
-                                          color: forground,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500),
-                                    ))
+                                if (contact['unseenMsg'] != 0)
+                                  Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          color: comment,
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                      child: Text(
+                                        '${contact['unseenMsg']}',
+                                        style: TextStyle(
+                                            color: forground,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500),
+                                      )),
                               ],
                             ),
                           );
@@ -154,23 +155,21 @@ class _RecentChatsState extends State<RecentChats> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: comment,
-          child: IconButton(
-            onPressed: () {
-              Navigator.push(
+          onPressed: () {
+            Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => (AllContacts()),
                   ));
-            },
-            icon: Icon(
+          },
+          backgroundColor: comment,
+          child:  Icon(
               Icons.add,
               color: forground,
+              size: 30,
             ),
-            iconSize: 30.0,
             tooltip: "New Chat",
-          )),
+          ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }

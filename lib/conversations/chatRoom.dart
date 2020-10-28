@@ -132,9 +132,11 @@ class _ChatRoomState extends State<ChatRoom> {
                           FirebaseFirestore.instance
                               .doc(
                                   'users/${contact['uid']}/$myUID/${snapshot.data.documents[index].documentID}')
-                              .update({'isRead': true, 'isDelivered': true});
+                              .update({'isRead': true});
+                          FirebaseFirestore.instance
+                              .doc('users/$myUID/RecentChats/${contact['uid']}')
+                              .update({'unseenMsg': 0});
                         }
-                        // print('users/${contact['uid']}/$myUID/${snapshot.data.documents[index].documentID}');
                         return ChatBox(snapshot.data.documents[index].data());
                       },
                     );
@@ -231,8 +233,6 @@ class _ChatRoomState extends State<ChatRoom> {
     sendController.dispose();
     super.dispose();
   }
-
-  
 }
 
 class ChatBox extends StatelessWidget {
@@ -241,67 +241,64 @@ class ChatBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        print("object");
-      },
+    var isSelected = false;
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 1),
+      padding: EdgeInsets.symmetric(vertical: 3),
+      width: MediaQuery.of(context).size.width,
+      color: isSelected
+          ? comment.withAlpha(100).withOpacity(0.5)
+          : Colors.transparent,
+      alignment:
+          chat['sendByMe'] ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        width: MediaQuery.of(context).size.width,
-        alignment:
-            chat['sendByMe'] ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
-            color: !chat['sendByMe'] ? comment : currentLine,
-          ),
-          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-          child: Stack(
-            children: [
-              Container(
-                padding:
-                    EdgeInsets.only(left: 10, top: 10, bottom: 15, right: 50),
-                child: Text(
-                  chat['msg'],
-                  style: TextStyle(color: forground, fontSize: 16),
-                ),
+        margin: EdgeInsets.symmetric(horizontal: 10),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 100),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.0),
+          color: !chat['sendByMe'] ? comment : currentLine,
+        ),
+        child: Stack(
+          children: [
+            Container(
+              padding:
+                  EdgeInsets.only(left: 10, top: 10, bottom: 15, right: 50),
+              child: Text(
+                chat['msg'],
+                style: TextStyle(color: forground, fontSize: 16),
               ),
+            ),
+            Positioned(
+              bottom: 5,
+              right: (chat['sendByMe']) ? 25 : 8,
+              child: Text(
+                DateFormat.Hm().format(chat['sendAt'].toDate()),
+                style: TextStyle(fontSize: 10, color: Colors.white60),
+              ),
+            ),
+            if (chat['sendByMe'])
               Positioned(
                 bottom: 5,
-                right: (chat['sendByMe']) ? 25 : 8,
-                child: Text(
-                  DateFormat.Hm().format(chat['sendAt'].toDate()),
-                  style: TextStyle(fontSize: 10, color: Colors.white60),
-                ),
-              ),
-              if (chat['sendByMe'])
-                Positioned(
-                  bottom: 5,
-                  right: 7,
-                  child: chat['isSent']
-                      ? chat['isDelivered']
-                          ? chat['isRead']
-                              ? Icon(
-                                  Icons.done_all,
-                                  size: 15,
-                                  color: Colors.blue,
-                                )
-                              : Icon(
-                                  Icons.done_all,
-                                  size: 15,
-                                )
-                          : Icon(
-                              Icons.done,
-                              size: 15,
-                            )
-                      : Icon(
-                          Icons.access_time,
-                          size: 13,
-                        ),
-                )
-            ],
-          ),
+                right: 7,
+                child: chat['isSent']
+                    ? chat['isRead']
+                        ? Icon(
+                            Icons.check_circle,
+                            size: 15,
+                            color: green,
+                          )
+                        : Icon(
+                            Icons.check_circle_outline,
+                            size: 15,
+                            color: forground,
+                          )
+                    : Icon(
+                        Icons.access_time,
+                        size: 15,
+                      ),
+              )
+          ],
         ),
       ),
     );

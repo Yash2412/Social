@@ -50,12 +50,11 @@ class UserService {
       'msg': conversation,
       'sendByMe': true,
       'sendAt': dt,
-      'isDelivered': false,
       'isRead': false,
       'isSent': false
     }).then((value) {
       value.update({'isSent': true});
-
+      print('chated');
       FirebaseFirestore.instance
           .collection('users')
           .doc(hisUID)
@@ -80,10 +79,11 @@ class UserService {
       'lastSignInTime': contact['lastSignInTime'],
       'displayName': contact['displayName'],
       'sendAt': dt,
+      'unseenMsg': 0,
       'uid': contact['uid'],
       'phoneNumber': contact['phoneNumber'],
       'photoURL': contact['photoURL'],
-      'pushNotificationToken': contact['pushNotificationToken']
+      'pushNotificationToken': contact['pushNotificationToken'],
     }).then((value) => print('My Recent chat added'));
 
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -92,9 +92,10 @@ class UserService {
         .doc(hisUID)
         .collection('RecentChats')
         .doc(myUID)
-        .set({
+        .update({
       'lastMsg': conversation,
       'sendByMe': false,
+      "unseenMsg": FieldValue.increment(1),
       'lastSignInTime': auth.currentUser.metadata.lastSignInTime,
       'displayName': auth.currentUser.displayName,
       'sendAt': dt,
