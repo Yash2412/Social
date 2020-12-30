@@ -153,6 +153,7 @@ class _GroupChatRoomState extends State<GroupChatRoom> {
       appBar: AppBar(
         backgroundColor: background,
         iconTheme: IconThemeData(color: forground, size: 30.0),
+        
         title: StreamBuilder(
           stream: FirebaseFirestore.instance
               .collection('groups')
@@ -174,6 +175,7 @@ class _GroupChatRoomState extends State<GroupChatRoom> {
                       MaterialPageRoute(
                           builder: (context) => GroupInfo(groupID, groupInfo)));
                 },
+                
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(groupInfo['groupPhoto']),
                   maxRadius: 20.0,

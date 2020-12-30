@@ -117,7 +117,7 @@ class _RecentChatsState extends State<RecentChats> {
                               subtitle: Text(
                                 contact['lastMsg'].toString().length > 30
                                     ? '${contact['lastMsg'].toString().replaceAll('\n', ' ').replaceAll('\t', ' ').substring(0, 30)} ....'
-                                    : contact['lastMsg'].toString(),
+                                    : '${contact['lastMsg'].toString()}',
                                 style: TextStyle(color: cyan),
                               ),
                               trailing: Column(

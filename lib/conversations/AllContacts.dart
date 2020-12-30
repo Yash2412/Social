@@ -198,9 +198,9 @@ class _AllContactsState extends State<AllContacts> {
                         return Text('Something went wrong');
                       }
 
-                      // if (snapshot.connectionState == ConnectionState.waiting) {
-                      //   return Center(child: CircularProgressIndicator());
-                      // }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container();
+                      }
 
                       contacts = snapshot.data.documents;
                       searchController.addListener(() {

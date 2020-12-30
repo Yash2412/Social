@@ -58,7 +58,7 @@ class _GroupInfoState extends State<GroupInfo> {
                   slivers: [
                     SliverAppBar(
                       backgroundColor: background,
-                      expandedHeight: 300,
+                      expandedHeight: 500,
                       elevation: 0,
                       iconTheme: IconThemeData(color: forground, size: 30.0),
                       flexibleSpace: FlexibleSpaceBar(
@@ -93,10 +93,12 @@ class _GroupInfoState extends State<GroupInfo> {
                             width: 20,
                             height: 20,
                             child: IconButton(
+
                               icon: Icon(
                                 Icons.edit,
                                 size: 20,
                                 color: orange,
+                                
                               ),
                               onPressed: () {
                                 editGroup();

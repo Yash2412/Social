@@ -333,10 +333,10 @@ class _OtpLoginState extends State<OtpLogin> {
                           borderRadius: BorderRadius.circular(8.0)),
                       onPressed: (otp.join().length == 6)
                           ? () {
+                              checkOTP();
                               setState(() {
                                 showProgressBar = true;
                               });
-                              checkOTP();
                             }
                           : null,
                       child: Text(

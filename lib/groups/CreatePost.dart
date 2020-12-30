@@ -163,34 +163,34 @@ class _CreatePostState extends State<CreatePost> {
                       thickness: 1.5,
                     ),
                     SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Hide from '),
-                          Switch(
-                              value: true,
-                              onChanged: (val) {
-                                print("object");
-                              })
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Hide from '),
-                          Switch(
-                              value: true,
-                              onChanged: (val) {
-                                print("object");
-                              })
-                        ],
-                      ),
-                    ),
+                    // Container(
+                    //   padding: EdgeInsets.symmetric(horizontal: 30),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Text('Hide from '),
+                    //       Switch(
+                    //           value: true,
+                    //           onChanged: (val) {
+                    //             print("object");
+                    //           })
+                    //     ],
+                    //   ),
+                    // ),
+                    // Container(
+                    //   padding: EdgeInsets.symmetric(horizontal: 30),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Text('Hide from '),
+                    //       Switch(
+                    //           value: true,
+                    //           onChanged: (val) {
+                    //             print("object");
+                    //           })
+                    //     ],
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
