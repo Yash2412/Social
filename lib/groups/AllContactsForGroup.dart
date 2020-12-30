@@ -3,10 +3,10 @@ import 'package:Social/theme/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
 class ListItem<T> {
   bool isSelected = false;
@@ -83,10 +83,12 @@ class _AllContactsForGroupState extends State<AllContactsForGroup> {
       });
     } else {
       //If permissions have been denied show standard cupertino alert dialog
-      Fluttertoast.showToast(
-        msg: "Opps! Permission Denied!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.SNACKBAR,
+
+      Toast.show(
+        "Opps! Permission Denied!",
+        context,
+        duration: Toast.LENGTH_SHORT,
+        gravity: Toast.BOTTOM,
       );
     }
   }

@@ -4,7 +4,7 @@ import 'package:Social/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:toast/toast.dart';
 
 import '../User.dart';
 
@@ -57,10 +57,12 @@ class _OtpLoginState extends State<OtpLogin> {
       setState(() {
         showProgressBar = false;
       });
-      Fluttertoast.showToast(
-        msg: "Opps! You entered a wrong OTP.Please check it again.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.SNACKBAR,
+
+      Toast.show(
+        "Opps! You entered a wrong OTP.Please check it again.",
+        context,
+        duration: Toast.LENGTH_SHORT,
+        gravity: Toast.BOTTOM,
       );
     });
   }
@@ -181,6 +183,7 @@ class _OtpLoginState extends State<OtpLogin> {
                                     if (value.length == 1) {
                                       FocusScope.of(context).nextFocus();
                                     }
+
                                     otp[0] = value;
                                   })
                                 },
@@ -203,6 +206,8 @@ class _OtpLoginState extends State<OtpLogin> {
                                   setState(() {
                                     if (value.length == 1) {
                                       FocusScope.of(context).nextFocus();
+                                    } else {
+                                      FocusScope.of(context).previousFocus();
                                     }
                                     otp[1] = value;
                                   })
@@ -226,6 +231,8 @@ class _OtpLoginState extends State<OtpLogin> {
                                   setState(() {
                                     if (value.length == 1) {
                                       FocusScope.of(context).nextFocus();
+                                    } else {
+                                      FocusScope.of(context).previousFocus();
                                     }
                                     otp[2] = value;
                                   })
@@ -249,6 +256,8 @@ class _OtpLoginState extends State<OtpLogin> {
                                   setState(() {
                                     if (value.length == 1) {
                                       FocusScope.of(context).nextFocus();
+                                    } else {
+                                      FocusScope.of(context).previousFocus();
                                     }
                                     otp[3] = value;
                                   })
@@ -272,6 +281,8 @@ class _OtpLoginState extends State<OtpLogin> {
                                   setState(() {
                                     if (value.length == 1) {
                                       FocusScope.of(context).nextFocus();
+                                    } else {
+                                      FocusScope.of(context).previousFocus();
                                     }
                                     otp[4] = value;
                                   })
@@ -293,8 +304,8 @@ class _OtpLoginState extends State<OtpLogin> {
                         child: TextField(
                             onChanged: (value) => {
                                   setState(() {
-                                    if (value.length == 1) {
-                                      FocusScope.of(context).unfocus();
+                                    if (value.length == 0) {
+                                      FocusScope.of(context).previousFocus();
                                     }
                                     otp[5] = value;
                                   })

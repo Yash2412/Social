@@ -16,60 +16,60 @@ var myUID = FirebaseAuth.instance.currentUser.uid;
 class _MainFeedState extends State<MainFeed> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: forground, size: 30.0),
-        title: Text('Post', style: TextStyle(color: forground)),
-        leading: IconButton(icon: Icon(Icons.home), onPressed: () {}),
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: background,
-        titleSpacing: 0,
-      ),
-      body: FutureBuilder(
-        future: FirebaseFirestore.instance
-            .collection('users')
-            .doc('$myUID')
-            .collection('posts')
-            .orderBy('sendAt', descending: true)
-            .get(),
-        builder: (context, posts) {
-          if (posts.hasError) {
-            return Text('Something went wrong');
-          }
+        appBar: AppBar(
+          iconTheme: IconThemeData(color: forground, size: 30.0),
+          title: Text('Post', style: TextStyle(color: forground)),
+          backgroundColor: background,
+        ),
+        body: FutureBuilder(
+          future: FirebaseFirestore.instance
+              .collection('users')
+              .doc('$myUID')
+              .collection('posts')
+              .orderBy('sendAt', descending: true)
+              .get(),
+          builder: (context, posts) {
+            if (posts.hasError) {
+              return Text('Something went wrong');
+            }
 
-          if (posts.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+            if (posts.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          return ListView.separated(
-            itemCount: posts.data.documents.length,
-            separatorBuilder: (context, index) {
-              return Divider(color: currentLine, thickness: 1.5);
-            },
-            itemBuilder: (context, index) {
-              var groupID = posts.data.documents[index].data()['groupID'];
-              var postID = posts.data.documents[index].id;
-              return FutureBuilder(
-                future: FirebaseFirestore.instance
-                    .collection('groups')
-                    .doc('$groupID')
-                    .collection('chats')
-                    .doc('$postID')
-                    .get(),
-                builder: (context, snap) {
-                  if (snap.hasError) {
-                    return Text('Something went wrong');
-                  }
+            return ListView.separated(
+              itemCount: posts.data.documents.length,
+              separatorBuilder: (context, index) {
+                return Divider(color: currentLine, thickness: 1.5);
+              },
+              itemBuilder: (context, index) {
+                var groupID = posts.data.documents[index].data()['groupID'];
+                var postID = posts.data.documents[index].id;
+                return FutureBuilder(
+                  future: FirebaseFirestore.instance
+                      .collection('groups')
+                      .doc('$groupID')
+                      .collection('chats')
+                      .doc('$postID')
+                      .get(),
+                  builder: (context, snap) {
+                    if (snap.hasError) {
+                      return Text('Something went wrong');
+                    }
 
-                  if (snap.connectionState == ConnectionState.waiting) {
-                    return Container();
-                  }
-                  return MainPostBox(snap.data, groupID, postID);
-                },
-              );
-            },
-          );
-        },
+                    if (snap.connectionState == ConnectionState.waiting) {
+                      return Container();
+                    }
+                    return MainPostBox(snap.data, groupID, postID);
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -96,18 +96,16 @@ class _MainPostBoxState extends State<MainPostBox> {
     return Column(
       children: [
         FutureBuilder(
-          future: Future.wait(
-            [
-              FirebaseFirestore.instance
-              .collection('users')
-              .doc('${postData.data()['sendBy']['uid']}')
-              .get(),
-              FirebaseFirestore.instance
-              .collection('groups')
-              .doc('$groupID')
-              .get()
-            ]
-          ),
+          future: Future.wait([
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc('${postData.data()['sendBy']['uid']}')
+                .get(),
+            FirebaseFirestore.instance
+                .collection('groups')
+                .doc('$groupID')
+                .get()
+          ]),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Text('Something went wrong');
@@ -208,9 +206,8 @@ class _MainPostBoxState extends State<MainPostBox> {
                     ),
                   ),
                   Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20),
-                          margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      margin: EdgeInsets.only(bottom: 10),
                       child: RichText(
                         text: TextSpan(children: [
                           TextSpan(

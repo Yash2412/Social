@@ -43,19 +43,20 @@ class _MyHomePageState extends State<MyHomePage>
         },
         items: [
           BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), title: Text('Hub')),
+              icon: Icon(Icons.dashboard), label: 'Hub'),
           BottomNavigationBarItem(
               activeIcon: Icon(Icons.chat_bubble),
               icon: Icon(Icons.chat_bubble_outline),
-              title: Text('Chat')),
+              label: 'Chat'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.view_day), title: Text('Feeds')),
+              icon: Icon(Icons.view_day), label: 'Feeds'),
         ],
       ),
     );
   }
 
   pushNotification() {
+    
     FirebaseMessaging().configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");

@@ -1,6 +1,6 @@
 import 'package:Social/User.dart';
+import 'package:Social/conversations/HisInfo.dart';
 import 'package:Social/theme/theme.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,19 +25,6 @@ class _ChatRoomState extends State<ChatRoom> {
   TextEditingController sendController = new TextEditingController();
   ScrollController _scrollController = new ScrollController();
 
-  @override
-  void initState() {
-    super.initState();
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (bool visible) {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(myUID)
-            .update({"isTyping": visible});
-      },
-    );
-  }
-
   void sendMessage() {
     if (sendController.text.trim().toString() != '') {
       UserService().addChat(contact, sendController.text.trim().toString());
@@ -58,6 +45,13 @@ class _ChatRoomState extends State<ChatRoom> {
       appBar: AppBar(
         iconTheme: IconThemeData(color: forground, size: 30.0),
         title: ListTile(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HisInfo(contact['uid'].toString())));
+            },
             leading: CircleAvatar(
               backgroundImage: NetworkImage(contact['photoURL']),
               maxRadius: 20.0,
@@ -95,10 +89,6 @@ class _ChatRoomState extends State<ChatRoom> {
         backgroundColor: background,
         automaticallyImplyLeading: true,
         titleSpacing: -10,
-        actions: [
-          IconButton(icon: Icon(Icons.call), onPressed: () {}),
-          IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
-        ],
       ),
       body: Stack(
         children: [

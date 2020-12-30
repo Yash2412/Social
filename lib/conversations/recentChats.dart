@@ -37,140 +37,143 @@ class _RecentChatsState extends State<RecentChats> {
         .orderBy('sendAt', descending: true)
         .snapshots();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Conversations",
-          style: TextStyle(fontSize: 20.0, color: forground),
-        ),
-        backgroundColor: background,
-        centerTitle: false,
-        titleSpacing: 20.0,
-        actions: [
-          IconButton(
-              iconSize: 25.0,
-              icon: Icon(
-                Icons.search,
-                color: forground,
-              ),
-              onPressed: null),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Container(
-            // decoration: BoxDecoration(color: Colors.black),
-            decoration: BoxDecoration(color: background),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "Conversations",
+            style: TextStyle(fontSize: 20.0, color: forground),
           ),
-          Container(
-              child: StreamBuilder(
-                  stream: collectionStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Something went wrong');
-                    }
+          backgroundColor: background,
+          centerTitle: false,
+          titleSpacing: 20.0,
+          actions: [
+            IconButton(
+                iconSize: 25.0,
+                icon: Icon(
+                  Icons.search,
+                  color: forground,
+                ),
+                onPressed: null),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Container(
+              // decoration: BoxDecoration(color: Colors.black),
+              decoration: BoxDecoration(color: background),
+            ),
+            Container(
+                child: StreamBuilder(
+                    stream: collectionStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Something went wrong');
+                      }
 
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
 
-                    if (snapshot.hasData) {
-                      return ListView.separated(
-                        separatorBuilder: (context, index) {
-                          return Divider(
-                            indent: 75.0,
-                            thickness: 0.5,
-                            color: Colors.black,
-                            height: 0,
-                          );
-                        },
-                        reverse: false,
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (context, index) {
-                          dynamic contact =
-                              snapshot.data.documents[index].data();
-                          checkUpdate(contact);
-                          var fifteenAgo = DateTime.now()
-                              .difference(contact['sendAt'].toDate());
-                          return ListTile(
-                            onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChatRoom(contact: contact),
-                                )),
-                            leading: CircleAvatar(
-                              backgroundImage:
-                                  NetworkImage(contact['photoURL']),
-                              maxRadius: 20.0,
-                              minRadius: 20.0,
-                            ),
-                            title: Text(
-                              contact['displayName'],
-                              style: TextStyle(
-                                  color: forground,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            isThreeLine: false,
-                            subtitle: Text(
-                              contact['lastMsg'].toString().length > 30
-                                  ? '${contact['lastMsg'].toString().replaceAll('\n', ' ').replaceAll('\t', ' ').substring(0, 30)} ....'
-                                  : contact['lastMsg'].toString(),
-                              style: TextStyle(color: cyan),
-                            ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text(
-                                    timeago.format(
-                                        DateTime.now().subtract(fifteenAgo),
-                                        locale: 'en_short'),
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                    )),
-                                if (contact['unseenMsg'] != 0)
-                                  Container(
-                                      padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                          color: comment,
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: Text(
-                                        '${contact['unseenMsg']}',
-                                        style: TextStyle(
-                                            color: forground,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
+                      if (snapshot.hasData) {
+                        return ListView.separated(
+                          separatorBuilder: (context, index) {
+                            return Divider(
+                              indent: 75.0,
+                              thickness: 0.5,
+                              color: Colors.black,
+                              height: 0,
+                            );
+                          },
+                          reverse: false,
+                          itemCount: snapshot.data.documents.length,
+                          itemBuilder: (context, index) {
+                            dynamic contact =
+                                snapshot.data.documents[index].data();
+                            checkUpdate(contact);
+                            var fifteenAgo = DateTime.now()
+                                .difference(contact['sendAt'].toDate());
+                            return ListTile(
+                              onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChatRoom(contact: contact),
+                                  )),
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(contact['photoURL']),
+                                maxRadius: 20.0,
+                                minRadius: 20.0,
+                              ),
+                              title: Text(
+                                contact['displayName'],
+                                style: TextStyle(
+                                    color: forground,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              isThreeLine: false,
+                              subtitle: Text(
+                                contact['lastMsg'].toString().length > 30
+                                    ? '${contact['lastMsg'].toString().replaceAll('\n', ' ').replaceAll('\t', ' ').substring(0, 30)} ....'
+                                    : contact['lastMsg'].toString(),
+                                style: TextStyle(color: cyan),
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(
+                                      timeago.format(
+                                          DateTime.now().subtract(fifteenAgo),
+                                          locale: 'en_short'),
+                                      style: TextStyle(
+                                        fontSize: 10,
                                       )),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  })),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
+                                  if (contact['unseenMsg'] != 0)
+                                    Container(
+                                        padding: EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                            color: comment,
+                                            borderRadius:
+                                                BorderRadius.circular(20)),
+                                        child: Text(
+                                          '${contact['unseenMsg']}',
+                                          style: TextStyle(
+                                              color: forground,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500),
+                                        )),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return CircularProgressIndicator();
+                      }
+                    })),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => (AllContacts()),
-                  ));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => (AllContacts()),
+                ));
           },
           backgroundColor: comment,
-          child:  Icon(
-              Icons.add,
-              color: forground,
-              size: 30,
-            ),
-            tooltip: "New Chat",
+          child: Icon(
+            Icons.add,
+            color: forground,
+            size: 30,
           ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          tooltip: "New Chat",
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      ),
     );
   }
 }

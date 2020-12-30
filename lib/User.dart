@@ -92,7 +92,7 @@ class UserService {
         .doc(hisUID)
         .collection('RecentChats')
         .doc(myUID)
-        .update({
+        .set({
       'lastMsg': conversation,
       'sendByMe': false,
       "unseenMsg": FieldValue.increment(1),

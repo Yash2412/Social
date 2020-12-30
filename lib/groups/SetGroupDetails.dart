@@ -3,8 +3,8 @@ import 'package:Social/Groups.dart';
 import 'package:Social/groups/GroupChatRoom.dart';
 import 'package:Social/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:toast/toast.dart';
 
 class GroupDetails extends StatefulWidget {
   final dynamic participants;
@@ -267,10 +267,11 @@ class _GroupDetailsState extends State<GroupDetails> {
                           });
                         });
                       } else {
-                        Fluttertoast.showToast(
-                          msg: "Please Fill Group Name!",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.SNACKBAR,
+                        Toast.show(
+                          "Please Fill Group Name!",
+                          context,
+                          duration: Toast.LENGTH_SHORT,
+                          gravity: Toast.BOTTOM,
                         );
                       }
                     },

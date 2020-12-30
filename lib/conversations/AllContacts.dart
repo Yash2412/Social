@@ -3,10 +3,10 @@ import 'package:Social/theme/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
 class AllContacts extends StatefulWidget {
   @override
@@ -19,6 +19,7 @@ class _AllContactsState extends State<AllContacts> {
   String myNumber = FirebaseAuth.instance.currentUser.phoneNumber;
   TextEditingController searchController = new TextEditingController();
   String myUID = FirebaseAuth.instance.currentUser.uid;
+  bool loading = true;
 
   String numberWithCountryCode(String phoneStr) {
     phoneStr = phoneStr.replaceAll('-', '');
@@ -57,6 +58,9 @@ class _AllContactsState extends State<AllContacts> {
 
   getAllContacts() async {
     if (await Permission.contacts.request().isGranted) {
+      setState(() {
+        loading = true;
+      });
       List<Contact> _contacts = (await ContactsService.getContacts()).toList();
       _contacts.forEach((cont) {
         cont.phones.forEach((phn) {
@@ -77,12 +81,17 @@ class _AllContactsState extends State<AllContacts> {
           });
         });
       });
+      setState(() {
+        loading = false;
+      });
     } else {
       //If permissions have been denied show standard cupertino alert dialog
-      Fluttertoast.showToast(
-        msg: "Opps! Permission Denied!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.SNACKBAR,
+
+      Toast.show(
+        "Opps! Permission Denied!",
+        context,
+        duration: Toast.LENGTH_SHORT,
+        gravity: Toast.BOTTOM,
       );
     }
   }
@@ -177,68 +186,96 @@ class _AllContactsState extends State<AllContacts> {
                 })
         ],
       ),
-      body: Container(
-          child: StreamBuilder(
-              stream: collectionStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text('Something went wrong');
-                }
+      body: Stack(
+        children: [
+          Opacity(
+            opacity: loading ? 0.25 : 1,
+            child: Container(
+                child: StreamBuilder(
+                    stream: collectionStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Text('Something went wrong');
+                      }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
+                      // if (snapshot.connectionState == ConnectionState.waiting) {
+                      //   return Center(child: CircularProgressIndicator());
+                      // }
 
-                contacts = snapshot.data.documents;
-                searchController.addListener(() {
-                  filterContacts();
-                });
+                      contacts = snapshot.data.documents;
+                      searchController.addListener(() {
+                        filterContacts();
+                      });
 
-                return ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider(
-                        indent: 75.0,
-                      );
-                    },
-                    itemCount: isSearching == true
-                        ? contactsFiltered.length
-                        : contacts.length,
-                    itemBuilder: (context, index) {
-                      dynamic contact = isSearching == true
-                          ? contactsFiltered[index].data()
-                          : contacts[index].data();
-                      return ListTile(
-                        onTap: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChatRoom(contact: contact),
-                            )),
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(contact['photoURL']),
-                          maxRadius: 20.0,
-                          minRadius: 20.0,
-                        ),
-                        title: Text(
-                          contact['displayName'],
-                          style: TextStyle(
-                              color: forground,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        // subtitle: Text('Here is a second line'),
-                        subtitle: Text(
-                          contact['phoneNumber'] != ''
-                              ? contact['phoneNumber']
-                              : '',
-                          style: TextStyle(color: cyan),
-                        ),
-                        trailing: Icon(
-                          Icons.arrow_right,
-                          size: 30.0,
-                        ),
-                      );
-                    });
-              })),
+                      return ListView.separated(
+                          separatorBuilder: (context, index) {
+                            return Divider(
+                              indent: 75.0,
+                            );
+                          },
+                          itemCount: isSearching == true
+                              ? contactsFiltered.length
+                              : contacts.length,
+                          itemBuilder: (context, index) {
+                            dynamic contact = isSearching == true
+                                ? contactsFiltered[index].data()
+                                : contacts[index].data();
+                            return ListTile(
+                              onTap: () => Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChatRoom(contact: contact),
+                                  )),
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(contact['photoURL']),
+                                maxRadius: 20.0,
+                                minRadius: 20.0,
+                              ),
+                              title: Text(
+                                contact['displayName'],
+                                style: TextStyle(
+                                    color: forground,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              // subtitle: Text('Here is a second line'),
+                              subtitle: Text(
+                                contact['phoneNumber'] != ''
+                                    ? contact['phoneNumber']
+                                    : '',
+                                style: TextStyle(color: cyan),
+                              ),
+                              trailing: Icon(
+                                Icons.arrow_right,
+                                size: 30.0,
+                              ),
+                            );
+                          });
+                    })),
+          ),
+          if (loading)
+            Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5,
+                    backgroundColor: background,
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text('Loading...'),
+              ],
+            ))
+        ],
+      ),
     );
   }
 }
