@@ -1,16 +1,9 @@
+![Logo](/Screenshort/Social114.png)
+
 # Social
 
-A new Flutter project.
+Social is a chatting cum social media application which allows user to create groups based on there type and can share text and media in it. All the posts which have been shared by your group members across all groups will also be made available separately like a post of Instagram which you can like and can comment on it too.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="/Screenshort/5.jpg" width="250"> <img src="/Screenshort/7.jpg" width="250"> <img src="/Screenshort/11.jpg" width="250"> <img src="/Screenshort/8.jpg" width="250">
