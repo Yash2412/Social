@@ -1,4 +1,4 @@
-![Logo](/Screenshort/Social114.png)
+![Poster](/Screenshort/thumbnail.png)
 
 # Social
 
